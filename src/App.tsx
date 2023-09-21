@@ -1,26 +1,57 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+
+type TPoint = { x: number, y: number} 
 
 function App() {
+  const [points, setPoints] = useState<TPoint[]>([])
+  const [popped, setPopped] = useState<TPoint[]>([])
+
+  function handlePlaceCircle(e: React.MouseEvent<HTMLDivElement>) {
+    const { clientX, clientY } = e
+    setPoints([ 
+      ...points, 
+      {
+        x: clientX,
+        y: clientY, 
+      }
+    ])
+  }
+
+  function handleUndo() {
+    const newPoints = [...points]
+    const poppedPoint = newPoints.pop()
+    if (!poppedPoint) return 
+    setPopped([...popped, poppedPoint])
+    setPoints(newPoints) 
+  }
+
+  function handleRedo() {
+    const newPopped = [...popped]
+    const poppedPoint = newPopped.pop()
+    if (!poppedPoint) return 
+    setPoints([...points, poppedPoint])
+    setPopped(newPopped) 
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <>
+    <button disabled={points.length === 0} onClick={handleUndo}>Undo</button>
+    <button disabled={popped.length === 0} onClick={handleRedo}>Redo</button>
+    <div className="App" onClick={handlePlaceCircle}>
+      {points.map((point, idx) => (
+        <div className="point"
+        key={idx }
+        style={
+          {
+            left: point.x - 5 + "px",
+            top: point.y - 5 + "px",
+          }
+        }>
+        </div>))}
     </div>
-  );
+    </>
+  )
 }
 
 export default App;
